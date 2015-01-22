@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="BOWImageClassification" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option show_notes="0">
+			<notes>
+				<![CDATA[This project has been done under CodeBlocks 10:05
+It is based on OpenCv revison 4873]]>
+			</notes>
+		</Option>
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/BOW" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-Weffc++" />
+					<Add option="-g" />
+					<Add option="-pipe" />
+					<Add option="-mthreads" />
+					<Add option="-msse2" />
+					<Add option="-msse4.2" />
+					<Add option="-D__GNUWIN32__" />
+					<Add directory="C:/lib/opencv/sources/include/opencv" />
+					<Add directory="C:/lib/opencv/sources/modules/imgproc/include" />
+					<Add directory="C:/lib/opencv/sources/modules/legacy/include" />
+					<Add directory="C:/lib/opencv/sources/modules/ml/include" />
+					<Add directory="C:/lib/opencv/sources/modules/objdetect/include" />
+					<Add directory="C:/lib/opencv/sources/modules/traincascade" />
+					<Add directory="C:/lib/opencv/sources/modules/ts/include" />
+					<Add directory="C:/lib/opencv/sources/modules/video/include" />
+					<Add directory="C:/lib/opencv/3rdparty/include" />
+					<Add directory="C:/lib/iputilities" />
+					<Add directory="C:/lib/opencv/3rdparty/libjpeg" />
+					<Add directory="C:/lib/opencv/sources/modules/androidcamera" />
+					<Add directory="C:/lib/opencv/sources/modules/calib3d/include" />
+					<Add directory="C:/lib/opencv/sources/modules/contrib" />
+					<Add directory="C:/lib/opencv/sources/modules/core/include" />
+					<Add directory="C:/lib/opencv/sources/modules/features2d/include" />
+					<Add directory="C:/lib/opencv/sources/modules/ffmpeg" />
+					<Add directory="C:/lib/opencv/sources/modules/flann/include" />
+					<Add directory="C:/lib/opencv/sources/modules/haartraining" />
+					<Add directory="C:/lib/opencv/sources/modules/highgui/include" />
+					<Add directory="C:/lib/opencv/sources/modules/nonfree/include" />
+					<Add directory="C:/lib/opencv/sources/modules/photo/include" />
+					<Add directory="C:/lib/opencv/sources/modules/stitching/include" />
+					<Add directory="C:/lib/opencv/sources/modules/videostab/include" />
+					<Add directory="C:/lib/opencv/sources/include" />
+					<Add directory="C:/lib/opencv/sources/modules/contrib/include" />
+				</Compiler>
+				<Linker>
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_videostab$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_calib3d$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_contrib$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_core$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_features2d$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_flann$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_highgui$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_imgproc$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_legacy$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_ml$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_nonfree$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_objdetect$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_photo$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_stitching$(#cvversion).dll" />
+					<Add library="C:\lib\opencv\build\mingw$(#winversion)\bin\libopencv_video$(#cvversion).dll" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/test-opencv" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="BOWToyLib.cpp" />
+		<Unit filename="BOWToyLib.h" />
+		<Unit filename="SVMDemo.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
