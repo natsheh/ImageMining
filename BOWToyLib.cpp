@@ -38,9 +38,6 @@ std::vector<string> read_file_list(const string file_list) {
 
 	return files;
 }
-
-
-
 //create a dictionary in BOW Model
 Mat create_dictionary(const string file_list) {
 	std::cout << "create_dictionary " << std::flush;
@@ -63,9 +60,9 @@ Mat create_dictionary(const string file_list) {
 		}
 
 		//all images are resized
-		resize(image, image, Size(256, 256));
+		resize(image, image, Size(1024, 254));
 		std::cout << "(" << i+1 << "/" << imglist.size() << ")Processing: " << imglist[i] << std::endl;
-		imshow(WIN_NAME, image);
+		//imshow(WIN_NAME, image);
 		//waitKey(10);
 
 		//extract SURF feature points
@@ -194,12 +191,12 @@ bool prepare_dataset12(BOWImgDescriptorExtractor& bowEx, Ptr<FeatureDetector> de
 }
 
 bool prepare_dataset(BOWImgDescriptorExtractor& bowEx, Ptr<FeatureDetector> detector,
-					 string list1[], Mat& samples, Mat& labels) {
+					 string  list1[], Mat& samples, Mat& labels,int N_classes) {
 
 	std::vector<string> imgfiles;
 	std::vector<KeyPoint> keypoints;
 	Mat descriptor;
-	int length_list= sizeof(list1)/sizeof(*list1);
+	int length_list=N_classes;
 	Mat l0[length_list];
 
 
@@ -210,16 +207,17 @@ bool prepare_dataset(BOWImgDescriptorExtractor& bowEx, Ptr<FeatureDetector> dete
     l0[ind] = Mat(1,1, CV_32F);
 	l0[ind].at<float>(0,0) = ind;
 
+    std::cout << "ind ====== " << l0[ind] << std::endl;
 	imgfiles = read_file_list(list1[ind]);
-	for (int i=0; i<(int)imgfiles.size()-1; ++i) {
+	for (int i=0; i<(int)imgfiles.size(); ++i) {
 		Mat img = imread(imgfiles[i]);
 		if (!img.data or img.empty()) {
 			std::cout << "(" << i+1 << "/" << imgfiles.size() << ")INVALID FILE - SKIPPED: " << imgfiles[i] << std::endl;
 			continue;
 		}
 
-		resize(img, img, Size(256, 256));
-		imshow("ImageClassification", img);
+		resize(img, img, Size(1024, 254));
+		//imshow("ImageClassification", img);
 		//waitKey(10);
 
 		//detect feature points
@@ -230,9 +228,14 @@ bool prepare_dataset(BOWImgDescriptorExtractor& bowEx, Ptr<FeatureDetector> dete
 
 		//compute descriptors according to our BOW dictionary
 		bowEx.compute(img, keypoints, descriptor);
+        std::cout << "(" << i+1 << "/" << imgfiles.size() << ")after compute Descriptors extraction: " << imgfiles[i] << std::endl;
 
 		samples.push_back(descriptor);	//store descriptor sample
+		std::cout << "(" << i+1 << "/" << imgfiles.size() << ")after push Descriptors extraction: " << imgfiles[i] << std::endl;
+
 		labels.push_back(l0[ind]);	//store label
+		std::cout << "(" << i+1 << "/" << imgfiles.size() << ")after label Descriptors extraction: " << imgfiles[i] << std::endl;
+
 	}
 
 	}
@@ -312,8 +315,6 @@ bool trainSVM(CvSVM& classifier, Mat samples, Mat labels) {
 	}
 }
 
-
-
 //SVM test function
 void testSVM(CvSVM& classifier, BOWImgDescriptorExtractor bowEx,
 					Ptr<FeatureDetector> detector, const string file_list) {
@@ -336,7 +337,7 @@ void testSVM(CvSVM& classifier, BOWImgDescriptorExtractor bowEx,
 
 			//SVM prediction
 			int prediction = (int)classifier.predict(descriptor);
-			std::cout << "SVM Prediction: " << _CLASS_LABELS[prediction] << std::endl;
+			std::cout << "SVM Prediction: " << _CLASS_LABELS[prediction] << "  "<<prediction << std::endl;
 			imshow("ImageClassification", img);
 			char k = waitKey(0);
 			if (k == 'q') {
@@ -346,7 +347,75 @@ void testSVM(CvSVM& classifier, BOWImgDescriptorExtractor bowEx,
 		} else {
 			std::cout << "(" << i+1 << "/" << imgfiles.size() << ")INVALID FILE - SKIPPED: " << imgfiles[i] << std::endl;
         }
-	}
+	}return;}
 
-	return;
+CvRTrees trainRtree( Mat samples, Mat labels,int N_classes) {
+
+     Mat var_type = Mat(samples.cols, 1, CV_8U );
+     var_type.setTo(Scalar(CV_VAR_NUMERICAL) );
+     var_type.at<uchar>(samples.cols, 0) = CV_VAR_CATEGORICAL;
+
+     float priors[] = {1,1,1,1,1,1,1,1,1,1};  // weights of each classification for classes
+        // (all equal as equal samples of each digit)
+
+        CvRTParams params = CvRTParams(25, // max depth
+                                       5, // min sample count
+                                       0, // regression accuracy: N/A here
+                                       false, // compute surrogate split, no missing data
+                                       15, // max number of categories (use sub-optimal algorithm for larger numbers)
+                                       priors, // the array of priors
+                                       false,  // calculate variable importance
+                                       4,       // number of variables randomly selected at node and used to find the best split(s).
+                                       100,	 // max number of trees in the forest
+                                       0.01f,				// forrest accuracy
+                                       CV_TERMCRIT_ITER |	CV_TERMCRIT_EPS // termination cirteria
+                                      );
+
+        // train random forest classifier (using training data)
+        std::cout << "Using training database:" << std::endl;
+
+       CvRTrees* classifier = new CvRTrees;
+       classifier->train(samples, CV_ROW_SAMPLE, labels,
+                     Mat(), Mat(), var_type, Mat(), params);
+        std::cout << "Trained SSSSSSSSSSSSSSSuccessfully" << std::endl;
+
+return *classifier;
+
 }
+
+
+void testRtree(CvRTrees& classifier, BOWImgDescriptorExtractor bowEx,
+					Ptr<FeatureDetector> detector, const string file_list) {
+
+	Mat descriptor;
+	std::vector<KeyPoint> keypoints;
+	std::vector<string> imgfiles = read_file_list(file_list);
+
+	//loop on all the images in the test set
+	for (int i=0; i<(int)imgfiles.size(); ++i) {
+		Mat img = imread(imgfiles[i]);
+		if (img.data and !img.empty()) {
+			resize(img, img, Size(256, 256));
+			std::cout << "(" << i+1 << "/" << imgfiles.size() << ")Predicting: " << imgfiles[i] << std::endl;
+
+			//find SURF feature points
+			detector->detect(img, keypoints);
+			//compute BOW descriptors
+			bowEx.compute(img, keypoints, descriptor);
+
+            int result =(int)classifier.predict(descriptor, Mat());
+
+			//SVM prediction
+			std::cout << "SVM Prediction: " << _CLASS_LABELS[result] <<"   "<< result <<std::endl;
+			//imshow("ImageClassification", img);
+			//char k = waitKey(0);
+			//if (k == 'q') {
+			//	break;
+			//}
+
+		} else {
+			std::cout << "(" << i+1 << "/" << imgfiles.size() << ")INVALID FILE - SKIPPED: " << imgfiles[i] << std::endl;
+        }
+	}return;}
+
+
