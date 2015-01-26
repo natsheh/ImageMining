@@ -18,6 +18,21 @@
 #include <locale>
 #include <sstream>
 #include <string>
+#include <cv.h>       // opencv general include file
+#include <ml.h>		  // opencv machine learning include file
+
+using namespace cv; // OpenCV API is in the C++ "cv" namespace
+
+#include <stdio.h>
+
+/******************************************************************************/
+// global definitions (for speed and ease of use)
+
+#define NUMBER_OF_TRAINING_SAMPLES 3823
+#define ATTRIBUTES_PER_SAMPLE 64
+#define NUMBER_OF_TESTING_SAMPLES 1797
+
+#define NUMBER_OF_CLASSES 10
 
 bool svm_demo_create_dict(Mat& dict);
 bool svm_demo_load_dict(Mat& dict);
@@ -28,6 +43,10 @@ bool svm_demo_save_dataset(Mat samples, Mat labels);
 bool svm_demo_load_dataset(Mat &samples, Mat &labels);
 void svm_demo_test(CvSVM& classifier,
     BOWImgDescriptorExtractor bowEx, Ptr<FeatureDetector> detector);
+
+void Rtree_demo_test(CvRTrees& classifier,
+                     BOWImgDescriptorExtractor bowEx, Ptr<FeatureDetector> detector);
+
 
 template <typename T>
 string NumberToString ( T Number )
@@ -51,10 +70,11 @@ int main(int argc, char **argv) {
 	std::vector<string> imgfiles;
 	std::vector<KeyPoint> keypoints;
 	Ptr<FeatureDetector> detector = FeatureDetector::create("SURF");	 //SURF feature detector
-	Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("FlannBased");	//feature matcher
-	Ptr<DescriptorExtractor> extractor = DescriptorExtractor::create("OpponentSURF");	//SURF descriptor extractor
+	Ptr<DescriptorMatcher> matcher(new FlannBasedMatcher);//DescriptorMatcher::create("FlannBased");	//feature matcher
+	Ptr<DescriptorExtractor> extractor(new SurfFeatureDetector);// = DescriptorExtractor::create("OpponentSURF");	//SURF descriptor extractor
 	BOWImgDescriptorExtractor bowEx(extractor, matcher);	//BOW descriptor extractor
-	CvSVM classifier; 	//SVM classifier
+	CvSVM classifier; 	// SVM classifier
+    CvRTrees RTreeclassifier;
     string selection = "";
     //string N_classes = "";
     string str="";
@@ -174,8 +194,9 @@ int main(int argc, char **argv) {
 
         //quit
         } else if (selection == "9") {
-            done = true;
 
+            RTreeclassifier=trainRtree( samples,  labels, N_classes);
+            Rtree_demo_test(RTreeclassifier,bowEx,detector);
 
         //default
         } else {
@@ -225,18 +246,24 @@ bool svm_demo_save_dict(Mat dict) {
 
 bool svm_demo_prepare_dataset(BOWImgDescriptorExtractor& bowEx,
         Ptr<FeatureDetector> detector, Mat& samples, Mat& labels,int N_classes) {
+    string file_list="";
+    std::cout << "Please enter File List of training data "<< std::flush;
+    std::cin >> file_list;
+
+    std::vector<string> Class_list = read_file_list(file_list);
 
     string filelist[N_classes];
+    for(int i =0;i<N_classes;i++)
+    {
+    filelist[i]=Class_list[i];
+    std::cout << "File List path : " +filelist[i] +"  "<< std::flush;
+     _CLASS_LABELS[i]=i;
+    std::cout << "Label : " << _CLASS_LABELS[i];
 
-    for(int i =0;i<N_classes;i++) {
-    std::cout << "Please enter File List of: " +_CLASS_LABELS[i] +"  "<< std::flush;
-    std::cin >> filelist[i];
-    std::cout << "Label : " << std::flush;
-    std::cin >> _CLASS_LABELS[i];
     }
 
 
-    return prepare_dataset(bowEx, detector,filelist , samples, labels);
+    return prepare_dataset(bowEx, detector,filelist , samples, labels,N_classes);
 }
 
 
@@ -262,7 +289,6 @@ bool svm_demo_load_dataset(Mat& samples, Mat& labels) {
 
 void svm_demo_test(CvSVM& classifier,
     BOWImgDescriptorExtractor bowEx, Ptr<FeatureDetector> detector) {
-
     string filelist;
 
     std::cout << "File List: " << std::flush;
@@ -270,3 +296,16 @@ void svm_demo_test(CvSVM& classifier,
 
     return testSVM(classifier, bowEx, detector, filelist);
 }
+
+
+
+void Rtree_demo_test(CvRTrees& classifier,BOWImgDescriptorExtractor bowEx, Ptr<FeatureDetector> detector)
+{   string filelist;
+    std::cout << "File List: " << std::flush;
+    std::cin >> filelist;
+ return  testRtree(classifier, bowEx, detector, filelist);
+
+}
+
+
+
